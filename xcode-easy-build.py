@@ -1,4 +1,5 @@
 import yaml
+import re
 import subprocess
 import argparse
 
@@ -21,7 +22,36 @@ def readConfiguration(file, configurationName):
 
 
 def runXcodeBuild(configuration):
-    subprocess.run([
+    subprocess.run(
+        constructCommandFromConfiguration(configuration) + [
+            "build"
+        ]
+    )
+
+
+def getExecutablePath(configuration):
+    ps = subprocess.run(
+        constructCommandFromConfiguration(configuration) + [
+            "-showBuildSettings"
+        ],
+        check=True,
+        capture_output=True
+    )
+
+    output = ps.stdout.decode("utf-8").strip()
+    targetBuildDir = re.search(
+            r"TARGET_BUILD_DIR = (.*)",
+            output,
+            re.MULTILINE).group(1)
+    executableFolderPath = re.search(
+            r"EXECUTABLE_FOLDER_PATH = (.*)",
+            output,
+            re.MULTILINE).group(1)
+    return targetBuildDir + "/" + executableFolderPath
+
+
+def constructCommandFromConfiguration(configuration):
+    return [
         "xcodebuild",
         "-scheme",
         configuration.scheme,
@@ -29,8 +59,7 @@ def runXcodeBuild(configuration):
         configuration.workspace,
         "-destination",
         configuration.destination,
-        "build"
-    ])
+    ]
 
 
 def parseArguments():
@@ -56,11 +85,14 @@ def parseArguments():
 
 def main():
     args = parseArguments()
+
     filename = args.input_file
     if filename is None:
         filename = "buildConfiguration.yml"
+
     config = readConfiguration(filename, args.confName)
-    runXcodeBuild(config)
+    print(getExecutablePath(config))
+    #runXcodeBuild(config)
 
 
 if __name__ == "__main__":
