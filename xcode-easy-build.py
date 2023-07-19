@@ -5,10 +5,11 @@ import argparse
 
 
 class Configuration:
-    def __init__(self, scheme, destination, workspace):
+    def __init__(self, scheme, destination, workspace, configuration):
         self.scheme = scheme
         self.destination = destination
         self.workspace = workspace
+        self.configuration = configuration
 
 
 def readConfiguration(file, configurationName):
@@ -18,7 +19,8 @@ def readConfiguration(file, configurationName):
     return Configuration(
             object["scheme"],
             object["destination"],
-            object["workspace"])
+            object["workspace"],
+            object["configuration"])
 
 
 def runXcodeBuild(configuration):
@@ -29,7 +31,7 @@ def runXcodeBuild(configuration):
     )
 
 
-def getExecutablePath(configuration):
+def getRelevantBuildOptions(configuration):
     ps = subprocess.run(
         constructCommandFromConfiguration(configuration) + [
             "-showBuildSettings"
@@ -39,6 +41,7 @@ def getExecutablePath(configuration):
     )
 
     output = ps.stdout.decode("utf-8").strip()
+    print(output)
     targetBuildDir = re.search(
             r"TARGET_BUILD_DIR = (.*)",
             output,
@@ -47,7 +50,11 @@ def getExecutablePath(configuration):
             r"EXECUTABLE_FOLDER_PATH = (.*)",
             output,
             re.MULTILINE).group(1)
-    return targetBuildDir + "/" + executableFolderPath
+    productBundleIdentifier = re.search(
+            r"PRODUCT_BUNDLE_IDENTIFIER = (.*)",
+            output,
+            re.MULTILINE).group(1)
+    return (targetBuildDir, executableFolderPath, productBundleIdentifier)
 
 
 def constructCommandFromConfiguration(configuration):
@@ -57,8 +64,12 @@ def constructCommandFromConfiguration(configuration):
         configuration.scheme,
         "-workspace",
         configuration.workspace,
+        "-configuration",
+        configuration.configuration,
         "-destination",
         configuration.destination,
+        "-sdk",
+        "iphonesimulator16.2"
     ]
 
 
@@ -83,6 +94,16 @@ def parseArguments():
     return args
 
 
+def installAppOnBootedDevice(appPath):
+    command = ("xcrun simctl install booted " + appPath).split()
+    subprocess.run(command, check=True, capture_output=False)
+
+
+def runAppOnBootedDevice(identifier):
+    command = ("xcrun simctl launch booted " + identifier).split()
+    subprocess.run(command, check=True, capture_output=False)
+
+
 def main():
     args = parseArguments()
 
@@ -91,8 +112,17 @@ def main():
         filename = "buildConfiguration.yml"
 
     config = readConfiguration(filename, args.confName)
-    print(getExecutablePath(config))
-    #runXcodeBuild(config)
+    buildOptions = getRelevantBuildOptions(config)
+    appPath = buildOptions[0] + "/" + buildOptions[1]
+    productIdentifier = buildOptions[2]
+    print("Starting build")
+    runXcodeBuild(config)
+
+    print("Install app on booted device")
+    installAppOnBootedDevice(appPath)
+
+    print("Launch app on booted device")
+    runAppOnBootedDevice(productIdentifier)
 
 
 if __name__ == "__main__":
