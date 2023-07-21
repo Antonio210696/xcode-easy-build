@@ -2,6 +2,7 @@ import yaml
 import re
 import subprocess
 import argparse
+from commands_runner import CommandsRunner
 
 
 class Configuration:
@@ -24,24 +25,19 @@ def readConfiguration(file, configurationName):
 
 
 def runXcodeBuild(configuration):
-    subprocess.run(
+    cmd = CommandsRunner(
         constructCommandFromConfiguration(configuration) + [
+            "-showBuildSettings",
             "build"
         ]
-    )
+    ).runCmd()
+
+    return cmd
 
 
-def getRelevantBuildOptions(configuration):
-    ps = subprocess.run(
-        constructCommandFromConfiguration(configuration) + [
-            "-showBuildSettings"
-        ],
-        check=True,
-        capture_output=True
-    )
+def getRelevantBuildOptions(buildOutput):
+    output = buildOutput.decode("utf-8").strip()
 
-    output = ps.stdout.decode("utf-8").strip()
-    print(output)
     targetBuildDir = re.search(
             r"TARGET_BUILD_DIR = (.*)",
             output,
@@ -95,13 +91,13 @@ def parseArguments():
 
 
 def installAppOnBootedDevice(appPath):
-    command = ("xcrun simctl install booted " + appPath).split()
-    subprocess.run(command, check=True, capture_output=False)
+    cmd = CommandsRunner(("xcrun simctl install booted " + appPath).split())
+    cmd.runCmd()
 
 
 def runAppOnBootedDevice(identifier):
-    command = ("xcrun simctl launch booted " + identifier).split()
-    subprocess.run(command, check=True, capture_output=False)
+    cmd = CommandsRunner(("xcrun simctl launch booted " + identifier).split())
+    cmd.runCmd()
 
 
 def main():
@@ -112,11 +108,12 @@ def main():
         filename = "buildConfiguration.yml"
 
     config = readConfiguration(filename, args.confName)
-    buildOptions = getRelevantBuildOptions(config)
+    print("Starting build")
+    buildOutput = runXcodeBuild(config).stdout
+
+    buildOptions = getRelevantBuildOptions(buildOutput)
     appPath = buildOptions[0] + "/" + buildOptions[1]
     productIdentifier = buildOptions[2]
-    print("Starting build")
-    runXcodeBuild(config)
 
     print("Install app on booted device")
     installAppOnBootedDevice(appPath)
