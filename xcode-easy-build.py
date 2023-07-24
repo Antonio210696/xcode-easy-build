@@ -1,6 +1,5 @@
 import yaml
 import re
-import subprocess
 import argparse
 from commands_runner import CommandsRunner
 
