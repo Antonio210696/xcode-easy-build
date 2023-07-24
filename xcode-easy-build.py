@@ -4,23 +4,21 @@ import argparse
 from commands_runner import CommandsRunner
 
 
-class Configuration:
-    def __init__(self, scheme, destination, workspace, configuration):
-        self.scheme = scheme
-        self.destination = destination
-        self.workspace = workspace
-        self.configuration = configuration
+class BuildConfiguration:
+    def __init__(self, actionConfiguration):
+        self.scheme = actionConfiguration["scheme"]
+        self.destination = actionConfiguration["destination"]
+        self.workspace = actionConfiguration["workspace"]
+        self.configuration = actionConfiguration["configuration"]
 
 
-def readConfiguration(file, configurationName):
+def readActionConfiguration(file, configurationName):
     yamlFile = open(file, "r")
-    object = yaml.safe_load(yamlFile)[configurationName]
+    actionTree = yaml.safe_load(yamlFile)[configurationName]
 
-    return Configuration(
-            object["scheme"],
-            object["destination"],
-            object["workspace"],
-            object["configuration"])
+    if actionTree["build"] is not None:
+        buildAction = actionTree["build"]
+        return BuildConfiguration(buildAction)
 
 
 def runXcodeBuild(configuration):
@@ -106,7 +104,7 @@ def main():
     if filename is None:
         filename = "buildConfiguration.yml"
 
-    config = readConfiguration(filename, args.confName)
+    config = readActionConfiguration(filename, args.confName)
     print("Starting build")
     buildOutput = runXcodeBuild(config).stdout
 
