@@ -1,14 +1,14 @@
 import re
-from commands_runner import CommandsRunner
 from build_configuration import BuildConfiguration
 
 
 class BuildAndRunConfiguration(BuildConfiguration):
-    def __init__(self, actionConfiguration):
+    def __init__(self, actionConfiguration, commandsRunner):
         self.scheme = actionConfiguration["scheme"]
         self.destination = actionConfiguration["destination"]
         self.workspace = actionConfiguration["workspace"]
         self.configuration = actionConfiguration["configuration"]
+        self.commandsRunner = commandsRunner
 
     def performAction(self):
         print("Starting build")
@@ -42,11 +42,9 @@ class BuildAndRunConfiguration(BuildConfiguration):
         return (targetBuildDir, executableFolderPath, productBundleIdentifier)
 
     def installAppOnBootedDevice(self, appPath):
-        cmd = CommandsRunner(
+        self.commandsRunner.runCmd(
                 ("xcrun simctl install booted " + appPath).split())
-        cmd.runCmd()
 
     def runAppOnBootedDevice(self, identifier):
-        cmd = CommandsRunner(
+        self.commandsRunner.runCmd(
                 ("xcrun simctl launch booted " + identifier).split())
-        cmd.runCmd()

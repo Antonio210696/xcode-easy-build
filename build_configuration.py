@@ -1,22 +1,34 @@
 from commands_runner import CommandsRunner
+import abc
 
 
-class BuildConfiguration:
-    def __init__(self, actionConfiguration):
+class IConfiguration(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def __init__(
+            self,
+            actionConfiguration: dict,
+            commandsRunner: CommandsRunner):
+        pass
+
+
+class BuildConfiguration(IConfiguration):
+    def __init__(
+            self,
+            actionConfiguration: dict,
+            commandsRunner: CommandsRunner):
         self.scheme = actionConfiguration["scheme"]
         self.destination = actionConfiguration["destination"]
         self.workspace = actionConfiguration["workspace"]
         self.configuration = actionConfiguration["configuration"]
+        self.commandsRunner = commandsRunner
 
     def runXcodeBuild(self):
-        cmd = CommandsRunner(
+        return CommandsRunner().runCmd(
             self.constructCommandFromConfiguration() + [
                 "-showBuildSettings",
                 "build"
             ]
-        ).runCmd()
-
-        return cmd
+        )
 
     def constructCommandFromConfiguration(self):
         return [

@@ -2,8 +2,5 @@ import subprocess
 
 
 class CommandsRunner:
-    def __init__(self, command):
-        self.command = command
-
-    def runCmd(self):
-        return subprocess.run(self.command, check=True, capture_output=True)
+    def runCmd(self, command: list) -> subprocess.CompletedProcess:
+        return subprocess.run(command, check=True, capture_output=True)

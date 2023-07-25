@@ -2,18 +2,19 @@ import yaml
 import argparse
 from build_configuration import BuildConfiguration
 from build_and_run_configuration import BuildAndRunConfiguration
+from commands_runner import CommandsRunner
 
 
-def readActionConfiguration(file, configurationName):
+def readActionConfiguration(file, configurationName, commandsRunner):
     yamlFile = open(file, "r")
     actionTree = yaml.safe_load(yamlFile)[configurationName]
 
     if "build" in actionTree.keys():
         buildAction = actionTree["build"]
-        return BuildConfiguration(buildAction)
+        return BuildConfiguration(buildAction, commandsRunner)
     elif "build_and_run" in actionTree.keys():
         buildAction = actionTree["build_and_run"]
-        return BuildAndRunConfiguration(buildAction)
+        return BuildAndRunConfiguration(buildAction, commandsRunner)
 
 
 def parseArguments():
@@ -44,7 +45,9 @@ def main():
     if filename is None:
         filename = "buildConfiguration.yml"
 
-    config = readActionConfiguration(filename, args.confName)
+    commandsRunner = CommandsRunner()
+
+    config = readActionConfiguration(filename, args.confName, commandsRunner)
     config.performAction()
 
 
