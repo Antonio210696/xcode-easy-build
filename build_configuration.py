@@ -1,13 +1,10 @@
-from commands_runner import CommandsRunner
+from commands_runner import ICommandsRunner
 import abc
 
 
 class IConfiguration(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def __init__(
-            self,
-            actionConfiguration: dict,
-            commandsRunner: CommandsRunner):
+    def performAction(self):
         pass
 
 
@@ -15,7 +12,7 @@ class BuildConfiguration(IConfiguration):
     def __init__(
             self,
             actionConfiguration: dict,
-            commandsRunner: CommandsRunner):
+            commandsRunner: ICommandsRunner):
         self.scheme = actionConfiguration["scheme"]
         self.destination = actionConfiguration["destination"]
         self.workspace = actionConfiguration["workspace"]
@@ -23,10 +20,14 @@ class BuildConfiguration(IConfiguration):
         self.commandsRunner = commandsRunner
 
     def runXcodeBuild(self):
-        return CommandsRunner().runCmd(
+        self.commandsRunner.runCmd(
             self.constructCommandFromConfiguration() + [
-                "-showBuildSettings",
                 "build"
+            ]
+        )
+        return self.commandsRunner.runCmd(
+            self.constructCommandFromConfiguration() + [
+                "-showBuildSettings"
             ]
         )
 

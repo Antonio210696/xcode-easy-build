@@ -2,10 +2,13 @@ import yaml
 import argparse
 from build_configuration import BuildConfiguration
 from build_and_run_configuration import BuildAndRunConfiguration
-from commands_runner import CommandsRunner
+from commands_runner import ICommandsRunner, CommandsRunner, VerboseCommandRunner, DryRunCommandRunner, CompositeCommandRunner
 
 
-def readActionConfiguration(file, configurationName, commandsRunner):
+def readActionConfiguration(
+        file: str,
+        configurationName: str,
+        commandsRunner: ICommandsRunner):
     yamlFile = open(file, "r")
     actionTree = yaml.safe_load(yamlFile)[configurationName]
 
@@ -45,7 +48,11 @@ def main():
     if filename is None:
         filename = "buildConfiguration.yml"
 
-    commandsRunner = CommandsRunner()
+    verboseRunner = VerboseCommandRunner()
+    dryRunner = DryRunCommandRunner()
+    commandsRunner = CompositeCommandRunner(
+            verboseRunner=verboseRunner,
+            dryRunner=dryRunner)
 
     config = readActionConfiguration(filename, args.confName, commandsRunner)
     config.performAction()
