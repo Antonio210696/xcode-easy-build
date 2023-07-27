@@ -10,14 +10,24 @@ class ICommandsRunner(metaclass=abc.ABCMeta):
 
 class CommandsRunner(ICommandsRunner):
     def runCmd(self, command: list) -> subprocess.CompletedProcess:
-        return subprocess.run(command, check=True, capture_output=True)
+        try:
+            return subprocess.run(command, check=True, capture_output=True)
+        except subprocess.CalledProcessError as error:
+            print(error.stdout.decode("utf-8"))
+            print(error.stderr.decode("utf-8"))
+            exit(error.returncode)
 
 
 class VerboseCommandRunner(ICommandsRunner):
     def runCmd(self, command: list) -> subprocess.CompletedProcess:
-        process = subprocess.run(command, check=True, capture_output=True)
-        print(process.stdout.decode("utf-8"))
-        return process
+        try:
+            process = subprocess.run(command, check=True, capture_output=True)
+            print(process.stdout.decode("utf-8"))
+            return process
+        except subprocess.CalledProcessError as error:
+            print(error.stdout.decode("utf-8"))
+            print(error.stderr.decode("utf-8"))
+            exit(error.returncode)
 
 
 class DryRunCommandRunner(ICommandsRunner):
