@@ -22,6 +22,7 @@ class BuildConfiguration(IConfiguration):
     def runXcodeBuild(self):
         self.commandsRunner.runCmd(
             self.constructCommandFromConfiguration() + [
+                "-quiet",
                 "build"
             ]
         )
