@@ -1,11 +1,11 @@
 import yaml
 import argparse
-from build_configuration import BuildConfiguration
-from build_and_run_configuration import BuildAndRunConfiguration
+from build_command import BuildCommand
+from build_and_run_command import BuildAndRunCommand
 from commands_runner import ICommandsRunner, CommandsRunner, VerboseCommandRunner, DryRunCommandRunner, CompositeCommandRunner
 
 
-def readActionConfiguration(
+def readCommand(
         file: str,
         configurationName: str,
         commandsRunner: ICommandsRunner):
@@ -14,10 +14,10 @@ def readActionConfiguration(
 
     if "build" in actionTree.keys():
         buildAction = actionTree["build"]
-        return BuildConfiguration(buildAction, commandsRunner)
+        return BuildCommand(buildAction, commandsRunner)
     elif "build_and_run" in actionTree.keys():
         buildAction = actionTree["build_and_run"]
-        return BuildAndRunConfiguration(buildAction, commandsRunner)
+        return BuildAndRunCommand(buildAction, commandsRunner)
 
 
 def parseArguments():
@@ -27,10 +27,10 @@ def parseArguments():
             type=str,
             help="""
             Input YAML file name.
-            By default, the script looks for \"buildConfiguration.yml\"
+            By default, the script looks for \"buildCommands.yml\"
             """)
     parser.add_argument(
-            "confName",
+            "commandName",
             type=str,
             help="""
             Mandatory: configuration name to look inside the
@@ -46,7 +46,7 @@ def main():
 
     filename = args.input_file
     if filename is None:
-        filename = "buildConfiguration.yml"
+        filename = "buildCommands.yml"
 
     verboseRunner = VerboseCommandRunner()
     dryRunner = DryRunCommandRunner()
@@ -54,8 +54,8 @@ def main():
             verboseRunner=verboseRunner,
             dryRunner=dryRunner)
 
-    config = readActionConfiguration(filename, args.confName, commandsRunner)
-    config.performAction()
+    command = readCommand(filename, args.commandName, commandsRunner)
+    command.performAction()
 
 
 if __name__ == "__main__":

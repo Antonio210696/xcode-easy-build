@@ -1,13 +1,17 @@
 import re
-from build_configuration import BuildConfiguration
+from commands_runner import ICommandsRunner
+from build_command import BuildCommand
 
 
-class BuildAndRunConfiguration(BuildConfiguration):
-    def __init__(self, actionConfiguration, commandsRunner):
-        self.scheme = actionConfiguration["scheme"]
-        self.destination = actionConfiguration["destination"]
-        self.workspace = actionConfiguration["workspace"]
-        self.configuration = actionConfiguration["configuration"]
+class BuildAndRunCommand(BuildCommand):
+    def __init__(
+            self,
+            commandConfiguration,
+            commandsRunner: ICommandsRunner):
+        self.scheme = commandConfiguration["scheme"]
+        self.destination = commandConfiguration["destination"]
+        self.workspace = commandConfiguration["workspace"]
+        self.configuration = commandConfiguration["configuration"]
         self.commandsRunner = commandsRunner
 
     def performAction(self):

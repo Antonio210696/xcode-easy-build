@@ -2,21 +2,21 @@ from commands_runner import ICommandsRunner
 import abc
 
 
-class IConfiguration(metaclass=abc.ABCMeta):
+class ICommand(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def performAction(self):
         pass
 
 
-class BuildConfiguration(IConfiguration):
+class BuildCommand(ICommand):
     def __init__(
             self,
-            actionConfiguration: dict,
+            commandConfiguration: dict,
             commandsRunner: ICommandsRunner):
-        self.scheme = actionConfiguration["scheme"]
-        self.destination = actionConfiguration["destination"]
-        self.workspace = actionConfiguration["workspace"]
-        self.configuration = actionConfiguration["configuration"]
+        self.scheme = commandConfiguration["scheme"]
+        self.destination = commandConfiguration["destination"]
+        self.workspace = commandConfiguration["workspace"]
+        self.configuration = commandConfiguration["configuration"]
         self.commandsRunner = commandsRunner
 
     def runXcodeBuild(self):
