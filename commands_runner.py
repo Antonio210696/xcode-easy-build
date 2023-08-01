@@ -15,7 +15,6 @@ class CommandsRunner(ICommandsRunner):
         except subprocess.CalledProcessError as error:
             print(error.stdout.decode("utf-8"))
             print(error.stderr.decode("utf-8"))
-            exit(error.returncode)
 
 
 class VerboseCommandRunner(ICommandsRunner):
@@ -27,7 +26,6 @@ class VerboseCommandRunner(ICommandsRunner):
         except subprocess.CalledProcessError as error:
             print(error.stdout.decode("utf-8"))
             print(error.stderr.decode("utf-8"))
-            exit(error.returncode)
 
 
 class DryRunCommandRunner(ICommandsRunner):
