@@ -1,9 +1,9 @@
 import re
 from commands_runner import ICommandsRunner
-from build_command import BuildCommand
+from build_based_command import BuildBasedCommand
 
 
-class BuildAndRunCommand(BuildCommand):
+class RunCommand(BuildBasedCommand):
     def __init__(
             self,
             commandConfiguration,
@@ -15,18 +15,23 @@ class BuildAndRunCommand(BuildCommand):
         self.commandsRunner = commandsRunner
 
     def performAction(self):
-        print("Starting build")
-        buildOutput = self.runXcodeBuild().stdout
-
-        buildOptions = self.getRelevantBuildOptions(buildOutput)
-        appPath = buildOptions[0] + "/" + buildOptions[1]
-        productIdentifier = buildOptions[2]
+        optionsList = self.listBuildOptions().stdout
+        buildOutputOptions = self.getRelevantBuildOptions(optionsList)
+        appPath = buildOutputOptions[0] + "/" + buildOutputOptions[1]
+        productIdentifier = buildOutputOptions[2]
 
         print("Install app on booted device")
         self.installAppOnBootedDevice(appPath)
 
         print("Launch app on booted device")
         self.runAppOnBootedDevice(productIdentifier)
+
+    def listBuildOptions(self):
+        return self.commandsRunner.runCmd(
+                self.constructCommandFromConfiguration() + [
+                    "-showBuildSettings",
+                    "-skipPackageUpdates"
+                ])
 
     def getRelevantBuildOptions(self, buildOutput):
         output = buildOutput.decode("utf-8").strip()

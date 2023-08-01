@@ -1,7 +1,7 @@
 import yaml
 import argparse
 from build_command import BuildCommand
-from build_and_run_command import BuildAndRunCommand
+from run_command import RunCommand
 from commands_runner import ICommandsRunner, CommandsRunner, VerboseCommandRunner, DryRunCommandRunner, CompositeCommandRunner
 
 
@@ -15,9 +15,9 @@ def readCommand(
     if "build" in actionTree.keys():
         buildAction = actionTree["build"]
         return BuildCommand(buildAction, commandsRunner)
-    elif "build_and_run" in actionTree.keys():
-        buildAction = actionTree["build_and_run"]
-        return BuildAndRunCommand(buildAction, commandsRunner)
+    elif "run" in actionTree.keys():
+        buildAction = actionTree["run"]
+        return RunCommand(buildAction, commandsRunner)
 
 
 def parseArguments():

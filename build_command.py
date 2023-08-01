@@ -1,14 +1,8 @@
+from build_based_command import BuildBasedCommand
 from commands_runner import ICommandsRunner
-import abc
 
 
-class ICommand(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    def performAction(self):
-        pass
-
-
-class BuildCommand(ICommand):
+class BuildCommand(BuildBasedCommand):
     def __init__(
             self,
             commandConfiguration: dict,
@@ -26,26 +20,6 @@ class BuildCommand(ICommand):
                 "build"
             ]
         )
-        return self.commandsRunner.runCmd(
-            self.constructCommandFromConfiguration() + [
-                "-showBuildSettings"
-            ]
-        )
-
-    def constructCommandFromConfiguration(self):
-        return [
-            "xcodebuild",
-            "-scheme",
-            self.scheme,
-            "-workspace",
-            self.workspace,
-            "-configuration",
-            self.configuration,
-            "-destination",
-            self.destination,
-            "-sdk",
-            "iphonesimulator16.2"
-        ]
 
     def performAction(self):
         print("Starting build")
