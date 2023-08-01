@@ -20,6 +20,9 @@ class RunCommand(BuildBasedCommand):
         appPath = buildOutputOptions[0] + "/" + buildOutputOptions[1]
         productIdentifier = buildOutputOptions[2]
 
+        print("Boot device if not booted")
+        self.bootDevice()
+
         print("Install app on booted device")
         self.installAppOnBootedDevice(appPath)
 
@@ -49,6 +52,10 @@ class RunCommand(BuildBasedCommand):
                 output,
                 re.MULTILINE).group(1)
         return (targetBuildDir, executableFolderPath, productBundleIdentifier)
+
+    def bootDevice(self):
+        self.commandsRunner.runCmd(
+                ("xcrun simctl boot \"iPhone 14\"").split())
 
     def installAppOnBootedDevice(self, appPath):
         self.commandsRunner.runCmd(
