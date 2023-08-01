@@ -30,8 +30,9 @@ def parseArguments():
             By default, the script looks for \"buildCommands.yml\"
             """)
     parser.add_argument(
-            "commandName",
+            "commandNames",
             type=str,
+            nargs="+",
             help="""
             Mandatory: configuration name to look inside the
             yml configuration file
@@ -54,8 +55,9 @@ def main():
             verboseRunner=verboseRunner,
             dryRunner=dryRunner)
 
-    command = readCommand(filename, args.commandName, commandsRunner)
-    command.performAction()
+    for commandName in args.commandNames:
+        command = readCommand(filename, commandName, commandsRunner)
+        command.performAction()
 
 
 if __name__ == "__main__":
