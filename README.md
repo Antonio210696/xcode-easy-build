@@ -43,6 +43,13 @@ command.
 - `--input-file`: specify the name for the configuration YAML file to look in
 	the current directory.
 
+### Supported Actions
+
+The tool currently is supporting the following actions:
+- `build`: builds the specified scheme.
+- `run`: runs the output of a build with the specified arguments. If a build
+	for the `run` configuration on hand is not present, this action will fail
+
 ### Example of `buildCommands.yml`
 
 ```yaml
@@ -53,3 +60,15 @@ buildApp:
     workspace: "App.xcworkspace"
     configuration: "Debug"
 ```
+
+## Future work and desirable features: 
+
+This program is still in an embryonal phase, so many of the features it is
+intended to have are still missing. Here are some of them in no particular order:
+
+- Wizard to autogenerate commands' configurations
+- Extend with additional actions
+- Improve output readability
+- Improve documentation
+- pip package
+
